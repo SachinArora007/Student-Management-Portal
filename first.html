@@ -1,11 +1,696 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description"
+        content="A simple and elegant student management system to add and delete student records." />
+    <title>Student Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <style>
+        /* ─── Reset & Base ─────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-start: #0f0c29;
+            --bg-mid: #302b63;
+            --bg-end: #24243e;
+            --glass-bg: rgba(255, 255, 255, 0.06);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --accent: #a78bfa;
+            --accent2: #60a5fa;
+            --danger: #f87171;
+            --success: #34d399;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-start), var(--bg-mid), var(--bg-end));
+            min-height: 100vh;
+            color: var(--text);
+            padding: 40px 20px 60px;
+        }
+
+        /* ─── Page Header ───────────────────────────────── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 48px;
+            animation: fadeDown 0.7s ease both;
+        }
+
+        .page-header .badge {
+            display: inline-block;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 50px;
+            margin-bottom: 16px;
+        }
+
+        .page-header h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 800;
+            background: linear-gradient(90deg, #a78bfa, #60a5fa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .page-header p {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 1rem;
+        }
+
+        /* ─── Layout ───────────────────────────────────── */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* ─── Glass Card ────────────────────────────────── */
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: var(--shadow);
+            padding: 32px;
+            margin-bottom: 32px;
+            animation: fadeUp 0.7s ease both;
+        }
+
+        .card h2 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+        }
+
+        .card h2 .icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+        }
+
+        /* ─── Form Grid ─────────────────────────────────── */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: var(--text);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
+            outline: none;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .form-group input:focus {
+            border-color: var(--accent);
+            background: rgba(167, 139, 250, 0.08);
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.2);
+        }
+
+        .form-group input.error {
+            border-color: var(--danger);
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
+        }
+
+        .form-group .err-msg {
+            font-size: 0.75rem;
+            color: var(--danger);
+            display: none;
+        }
+
+        .form-group input.error~.err-msg {
+            display: block;
+        }
+
+        /* ─── Buttons ───────────────────────────────────── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 13px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 28px rgba(167, 139, 250, 0.6);
+        }
+
+        .btn-danger {
+            background: rgba(248, 113, 113, 0.15);
+            color: var(--danger);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            padding: 7px 14px;
+            font-size: 0.8rem;
+            border-radius: 8px;
+        }
+
+        .btn-danger:hover {
+            background: rgba(248, 113, 113, 0.28);
+        }
+
+        /* ─── Stats Bar ─────────────────────────────────── */
+        .stats {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stats .count {
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .stats .count span {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+
+        /* ─── Search ─────────────────────────────────────── */
+        .search-wrap {
+            position: relative;
+        }
+
+        .search-wrap input {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 10px 16px 10px 40px;
+            color: var(--text);
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: border-color 0.25s;
+            width: 220px;
+        }
+
+        .search-wrap input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ─── Table ─────────────────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead th {
+            text-align: left;
+            padding: 12px 16px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--muted);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        tbody tr {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        tbody td {
+            padding: 14px 16px;
+            vertical-align: middle;
+        }
+
+        /* Avatar initials */
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            margin-right: 10px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .name-cell {
+            display: flex;
+            align-items: center;
+        }
+
+        /* ─── Empty State ───────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+        }
+
+        .empty-state .emoji {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        /* ─── Toast ─────────────────────────────────────── */
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 14px 22px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #fff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        #toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #toast.success-toast {
+            background: linear-gradient(135deg, #059669, #34d399);
+        }
+
+        #toast.danger-toast {
+            background: linear-gradient(135deg, #dc2626, #f87171);
+        }
+
+        /* ─── Animations ────────────────────────────────── */
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes rowIn {
+            from {
+                opacity: 0;
+                transform: translateX(-16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .row-animate {
+            animation: rowIn 0.35s ease both;
+        }
+
+        /* ─── Responsive ─────────────────────────────────── */
+        @media (max-width: 600px) {
+            .card {
+                padding: 20px 16px;
+            }
+
+            .stats {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-wrap input {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
+
 <body>
-    
+
+    <!-- ── Header ── -->
+    <header class="page-header">
+        <div class="badge">🎓 Student Portal</div>
+        <h1>Student Management System</h1>
+        <p>Add, view, and manage student records with ease</p>
+    </header>
+
+    <main class="container">
+
+        <!-- ── Add Student Form ── -->
+        <section class="card" style="animation-delay:0.1s">
+            <h2>
+                <span class="icon">➕</span>
+                Add New Student
+            </h2>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="e.g. Priya Sharma" />
+                    <span class="err-msg">Please enter a valid name.</span>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" placeholder="e.g. 20" min="5" max="100" />
+                    <span class="err-msg">Age must be between 5 and 100.</span>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="e.g. priya@example.com" />
+                    <span class="err-msg">Please enter a valid email.</span>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" placeholder="e.g. 9876543210" />
+                    <span class="err-msg">Enter a 10-digit phone number.</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" id="addBtn" onclick="addStudent()">
+                ✚ &nbsp;Add Student
+            </button>
+        </section>
+
+        <!-- ── Students Table ── -->
+        <section class="card" style="animation-delay:0.25s">
+            <h2>
+                <span class="icon">📋</span>
+                Student Records
+            </h2>
+
+            <div class="stats">
+                <p class="count">Total Students: <span id="totalCount">0</span></p>
+                <div class="search-wrap">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Search students…" oninput="filterTable()" />
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- rows injected by JS -->
+                    </tbody>
+                </table>
+
+                <!-- Empty State -->
+                <div class="empty-state" id="emptyState">
+                    <div class="emoji">🎒</div>
+                    <p>No students found. Add one above to get started!</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ── Toast Notification ── -->
+    <div id="toast"></div>
+
+    <!-- ─────────────── JavaScript ─────────────── -->
+    <script>
+        let students = JSON.parse(localStorage.getItem('students') || '[]');
+
+        /* ── Render Table ── */
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            const empty = document.getElementById('emptyState');
+            tbody.innerHTML = '';
+
+            data = data || students;
+
+            if (data.length === 0) {
+                empty.style.display = 'block';
+                document.getElementById('totalCount').textContent = students.length;
+                return;
+            }
+            empty.style.display = 'none';
+
+            data.forEach((s, i) => {
+                const initials = s.name.split(' ').map(w => w[0]).join('').slice(0, 2);
+                const tr = document.createElement('tr');
+                tr.className = 'row-animate';
+                tr.id = 'row-' + s.id;
+                tr.innerHTML = `
+          <td style="color:var(--muted);font-weight:600">${i + 1}</td>
+          <td>
+            <div class="name-cell">
+              <div class="avatar">${initials}</div>
+              <span>${escHtml(s.name)}</span>
+            </div>
+          </td>
+          <td>${escHtml(String(s.age))}</td>
+          <td>${escHtml(s.email)}</td>
+          <td>${escHtml(s.phone)}</td>
+          <td>
+            <button class="btn btn-danger" onclick="deleteStudent(${s.id})">🗑 Delete</button>
+          </td>
+        `;
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('totalCount').textContent = students.length;
+        }
+
+        /* ── Add Student ── */
+        function addStudent() {
+            const nameEl = document.getElementById('name');
+            const ageEl = document.getElementById('age');
+            const emailEl = document.getElementById('email');
+            const phoneEl = document.getElementById('phone');
+
+            let valid = true;
+
+            /* Name validation */
+            if (!nameEl.value.trim() || nameEl.value.trim().length < 2) {
+                setError(nameEl); valid = false;
+            } else clearError(nameEl);
+
+            /* Age validation */
+            const age = parseInt(ageEl.value);
+            if (!ageEl.value || isNaN(age) || age < 5 || age > 100) {
+                setError(ageEl); valid = false;
+            } else clearError(ageEl);
+
+            /* Email validation */
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRe.test(emailEl.value.trim())) {
+                setError(emailEl); valid = false;
+            } else clearError(emailEl);
+
+            /* Phone validation */
+            const phoneRe = /^\d{10}$/;
+            if (!phoneRe.test(phoneEl.value.trim())) {
+                setError(phoneEl); valid = false;
+            } else clearError(phoneEl);
+
+            if (!valid) return;
+
+            const student = {
+                id: Date.now(),
+                name: nameEl.value.trim(),
+                age: age,
+                email: emailEl.value.trim().toLowerCase(),
+                phone: phoneEl.value.trim()
+            };
+
+            students.push(student);
+            save();
+            renderTable();
+
+            /* Clear form */
+            [nameEl, ageEl, emailEl, phoneEl].forEach(el => el.value = '');
+
+            showToast('✅ Student added successfully!', 'success');
+        }
+
+        /* ── Delete Student ── */
+        function deleteStudent(id) {
+            const row = document.getElementById('row-' + id);
+            if (row) {
+                row.style.transition = 'opacity 0.3s, transform 0.3s';
+                row.style.opacity = '0';
+                row.style.transform = 'translateX(30px)';
+                setTimeout(() => {
+                    students = students.filter(s => s.id !== id);
+                    save();
+                    renderTable();
+                    showToast('🗑 Student deleted.', 'danger');
+                }, 300);
+            }
+        }
+
+        /* ── Filter / Search ── */
+        function filterTable() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = students.filter(s =>
+                s.name.toLowerCase().includes(q) ||
+                s.email.toLowerCase().includes(q) ||
+                s.phone.includes(q)
+            );
+            renderTable(filtered);
+        }
+
+        /* ── Helpers ── */
+        function setError(el) { el.classList.add('error'); }
+        function clearError(el) { el.classList.remove('error'); }
+
+        function escHtml(str) {
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function save() {
+            localStorage.setItem('students', JSON.stringify(students));
+        }
+
+        let toastTimer;
+        function showToast(msg, type) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'show ' + (type === 'success' ? 'success-toast' : 'danger-toast');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+        }
+
+        /* ── Allow Enter key to submit ── */
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Enter') addStudent();
+            });
+        });
+
+        /* ── Init ── */
+        renderTable();
+    </script>
+
 </body>
+
 </html>
